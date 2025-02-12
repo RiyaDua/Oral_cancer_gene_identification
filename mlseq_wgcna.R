@@ -7,25 +7,11 @@ library(DESeq2)
 library(MLmetrics)
 
 #setting path and loading file
-setwd("C:/Users/dua_n/Desktop/Dissertation")
+setwd("path/to/my/data.csv")
 
 #loading complete data
-mydata <- read.csv("C:/Users/dua_n/Desktop/Dissertation/count_data.csv", header=TRUE)
+mydata <- read.csv("path/to/my/data.csv", header=TRUE)
 
-
-#data manipulation- PREPARING THE RAW COUNTS DATA 
-colnames(mydata)[1]<-"GeneID"
-colnames(mydata)[2]<-"GSM4313065"
-colnames(mydata)[3]<-"GSM4313067"
-colnames(mydata)[4]<-"GSM4313069"
-colnames(mydata)[5]<-"GSM4313071"
-colnames(mydata)[6]<-"GSM4313073"
-colnames(mydata)[7]<-"GSM4313075"
-colnames(mydata)[8]<-"GSM4313077"
-colnames(mydata)[9]<-"GSM4313079"
-colnames(mydata)[10]<-"GSM4313081"
-colnames(mydata)[11]<-"GSM4313082"
-View(mydata)
 
 
 #making gene ids as row names
@@ -33,36 +19,29 @@ rownames(mydata) <- mydata$GeneID
 mydata<-mydata[,-1]
 View(mydata)
 
-#just checking the loaded data
-head(mydata[ ,1:10]) 
-
 
 # Read in rownames from file- sybsetting wrt to wgcna driver genes
-rownames_subset <- readLines("subset_wgcna.txt")
+rownames_subset <- readLines("wgcna.txt")
 
 # Subset of data frame based on rownames read in from file and same columns
 subset_df <- mydata[rownames(mydata) %in% 
                   rownames_subset, 
-                c("GSM4313065",
-                  "GSM4313067",
-                  "GSM4313069",
-                  "GSM4313071" ,
-                  "GSM4313073",
-                  "GSM4313075",
-                  "GSM4313077",
-                  "GSM4313079", 
-                  "GSM4313081",
-                  "GSM4313082")]
+                c("1",
+                  "2",
+                  "3",
+                  "4" ,
+                  "5",
+                  "6",
+                  "7",
+                  "8", 
+                  "9",
+                  "10")]
 
-# Output the subset data frame
-View(subset_df)
 
 
 #CREATING CLASS DATA
 #creating a variable class which will contain our labels
 class_df <- data.frame(condition = factor(rep(c("M","N"), c(5, 5))))
-rownames(class_df) <- c("GSM4313065", "GSM4313067", "GSM4313069","GSM4313071","GSM4313073","GSM4313075","GSM4313077","GSM4313079","GSM4313081","GSM4313082")  # set row names
-View(class_df)
 
 
 ##SPLITTING THE DATA
@@ -71,7 +50,7 @@ n_df <- ncol(subset_df)
 p_df <- nrow(subset_df)
 
 
-#here we select 30% columns as test data in oral cancer
+#here we select 30% columns as test data 
 nTest_df <- ceiling(n_df*0.3)
 
 #we create the same 30% sample split in class data 
@@ -79,25 +58,13 @@ nTest_df <- ceiling(n_df*0.3)
 ind_df <- sample(n_df, nTest_df, FALSE)
 
 #TRAIN SET
-# extract the row names
 rownames_df <- rownames(subset_df)
-
-#putting oral cancer dataset as matrix and adding 1 
-#to values so that there are no 0 values
 data.train_df <- as.matrix(subset_df[ ,-ind_df] + 1)
-
-# assign back the row names since in previous step rownames
-#get lost in the dataframe.
 rownames(data.train_df) <- rownames_df
 
 
 #TEST SET
-#putting oral cancer dataset as matrix and adding 1 
-#to values so that there are no 0 values
 data.test_df <- as.matrix(subset_df[ ,ind_df] + 1)
-
-# assign back the row names since in previous step rownames
-#get lost in the dataframe.
 rownames(data.test_df) <- rownames_df
 
 
@@ -126,12 +93,7 @@ set.seed(2128)
 
 #Normalization and transformation
 
-#1.CARRET BASED thus using
-
-#pre-processing and not normalize. 
-#deseq-vst: Normalization is applied with deseq 
-#median ratio method. Variance stabiling 
-#transformation is applied to the normalized data.
+#1.CARRET BASED 
 
 #rf-classifier
 #normalization-deseq
@@ -185,6 +147,7 @@ actual.rf2_sub <- relevel(classts_df$condition, ref = "N")
 tbl.rf2_sub <- table(Predicted = pred.rf2_sub, Actual = actual.rf2_sub)
 confusionMatrix(tbl.rf2_sub, positive = "N")
 
+
 #rf-classifier
 #normalization-deseq
 #transformation-rlog
@@ -210,36 +173,7 @@ tbl.rf3_sub <- table(Predicted = pred.rf3_sub, Actual = actual.rf3_sub)
 confusionMatrix(tbl.rf3_sub, positive = "N")
 
 
-# 2. Discrete classifiers:
-# Poisson Linear Discriminant Analysis
-#pmodel <- classify(data = data.trainS4_sub, method = "PLDA", ref = "N",
-#                  class.labels = "condition",normalize = "deseq",
-#                 control = discreteControl(number = 5, repeats = 2,
-#                                          tuneLength = 10, parallel = TRUE))
-#pmodel
 
-set.seed(2128)
-# 3. Voom based Nearest Shrunken Centroids.
-#this is a voom based classifier thus using normalize
-#fit <- classify(data = data.trainS4_sub,
-#               method = "voomNSC",
-#              normalize = "deseq", 
-#             ref = "N",
-#            control = voomControl(tuneLength = 20))
-
-
-# Support Vector Machines with Radial Kernel
-#classifier-svm
-#normalization-deseq
-#transformation-rlog
-fit_sub <- classify(data = data.trainS4_sub,
-                method = "svmRadial",
-                preProcessing = "deseq-rlog",
-                ref = "N",
-                control = trainControl(method = "repeatedcv", 
-                                       number = 5,
-                                       repeats = 3, 
-                                       classProbs = TRUE))
 
 show(fit_sub)
 MLSeq::plot(fit_sub)
@@ -305,21 +239,13 @@ tbl.fit.svm_sub <- table(Predicted = pred.fit.svm_sub, Actual = actual.fit.svm_s
 confusionMatrix(tbl.fit.svm_sub, positive = "N")
 
 
-#The final values used for the model were sigma
-#= 8.992966e-06 and C = 0.25.
-## An object of class "MLSeq"
-## Model Description: Support Vector Machines with 
-#Radial Basis Function Kernel (svmRadial)
-
 
 # Define control list
 ctrl.svm <- trainControl(method = "repeatedcv", 
                          number = 5, repeats = 1)
 
 
-#trying to optimize by changing hyperparameters
-#Support vector machines with radial basis function kernel
-#svm, deseq, vst
+
 fit.svm2 <- classify(data = data.trainS4_sub,
                      method = "svmRadial",
                      preProcessing = "deseq-vst", 
@@ -337,16 +263,15 @@ pred.svm <- relevel(pred.svm, ref = "N")
 actual <- relevel(classts$condition, ref = "N")
 tbl <- table(Predicted = pred.svm, Actual = actual)
 confusionMatrix(tbl, positive = "N")
-#the accuracy and specificity is very poor of this model.
 
 
 # Define control lists.- COMPARING MODELS PERFORMANCE
 ctrl.continuous <- trainControl(method = "repeatedcv", 
                                 number = 5, repeats = 10)
-# Continuous classifiers, SVM and NSC
 
 
-#svm,deseq,vst
+
+
 fit.svm3 <- classify(data = data.trainS4_sub, 
                      method = "svmRadial",
                      preProcessing = "deseq-vst",
@@ -359,7 +284,7 @@ fit.svm3 <- classify(data = data.trainS4_sub,
 ctrl.continuous2_sub <- trainControl(method = "repeatedcv",
                                  number = 5, repeats = 5)
 
-#pam,deseq,vst
+
 set.seed(1234)
 fit.NSC_sub <- classify(data = data.trainS4_sub, 
                     method = "pam",
