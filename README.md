@@ -1,6 +1,6 @@
 # 🧬 Identification of Oral Cancer Candidate Genes using Machine Learning Approaches
 
-This repository contains reusable scripts and workflow details from my Master's thesis project, where we developed a **machine learning-based model** to identify candidate genes for **Oral Cancer** using **RNA-seq data**.  
+This repository contains reusable scripts and workflow details from my Master's thesis project, where we developed a **machine learning-based model** to identify candidate genes for **Oral Cancer** using **RNA-seq data** and network analysis.  
 *(Full study is under review for publication.)*  
 
 ## 🔍 Research Overview
