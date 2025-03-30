@@ -1,58 +1,19 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2821
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fswiss\fcharset0 Helvetica-Oblique;\f2\froman\fcharset0 Times-Roman;
-\f3\froman\fcharset0 Times-Italic;\f4\fswiss\fcharset0 ArialMT;}
-{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
-{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
-\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+# using trimmomatic tool
+java -jar /home/pallavis/pooja/trimommatic/Trimmomatic-0.36/trimmomatic-0.36.jar PE /home/pallavis/pooja/sra/sratoolkit../bin/SRR21496995_1.fastq /home/pallavis/ pooja/sra/sratoolkit../bin/SRR21496995_2.fastq SRR21496995_p_1.fastq unpaired_cut_1_SRR21496995.fastq SRR21496995_p_2.fastq unpaired_cut_2_SRR21496995.fastq HEADCROP:3 MINLEN:10 
 
-\f0\fs24 \cf0 # using trimmomatic tool\
-\pard\pardeftab720\sl368\partightenfactor0
 
-\f1\i\fs32 \cf2 \expnd0\expndtw0\kerning0
-java -jar /home/pallavis/pooja/trimommatic/Trimmomatic-0.36/trimmomatic-0.36.jar PE /home/pallavis/pooja/sra/sratoolkit../bin/SRR21496995_1.fastq /home/pallavis/ pooja/sra/sratoolkit../bin/SRR21496995_2.fastq
-\f2\i0\fs29\fsmilli14667  
-\f1\i\fs32 SRR21496995_p_1.fastq unpaired_cut_1_SRR21496995.fastq SRR21496995_p_2.fastq unpaired_cut_2_SRR21496995.fastq HEADCROP:3 MINLEN:10 \
-\
-\
-# using star aligner\
-\pard\pardeftab720\sl368\partightenfactor0
+# using star aligner
+./STAR --runMode alignReads --outFileNamePrefix output83 --genomeDir sta-index --readFilesIn /home/pallavis/pooja/sra/sratoolkit.3.0.0-ubuntu64/bin/SRR11080783_p_1.fastq /home/pallavis/pooja/sra/sratoolkit.3.0.0-ubuntu64/bin/SRR11080783_p_2.fastq --outSAMtype BAM SortedByCoordinate --runThreadN 4 
 
-\f3\fs29\fsmilli14667 \cf2 .
-\f1 /STAR --runMode alignReads --outFileNamePrefix output83 --genomeDir sta-index --readFilesIn /home/pallavis/pooja/sra/sratoolkit.3.0.0-ubuntu64/bin/SRR11080783_p_1.fastq /home/pallavis/pooja/sra/sratoolkit.3.0.0-ubuntu64/bin/SRR11080783_p_2.fastq --outSAMtype BAM SortedByCoordinate --runThreadN 4
-\f2\i0\fs24  \
-\
-\pard\pardeftab720\sl368\partightenfactor0
+##Locating bamfile
+file <- list.files(pattern = "\\.bam$")
 
-\f1\i\fs32 \cf2 ##Locating bamfile
-\f4\i0\fs29\fsmilli14667 \
+####Defining gene models
+gtffile1 <- file.path("Homo_sapiens.GRCh38.gtf")
 
-\f1\i\fs32 file <- list.files(pattern = "\\\\.bam$")
-\f4\i0\fs29\fsmilli14667 \
-
-\f1\i\fs32 ####Defining gene models
-\f4\i0\fs29\fsmilli14667 \
-
-\f1\i\fs32 gtffile1 <- file.path("Homo_sapiens.GRCh38.gtf")
-\f4\i0\fs29\fsmilli14667 \
-
-\f1\i\fs32 ###Counting with featureCounts
-\f4\i0\fs29\fsmilli14667 \
-
-\f1\i\fs32 library ("Rsubread\'94)\
-\pard\pardeftab720\sl368\partightenfactor0
-
-\f4\i0\fs29\fsmilli14667 \cf2 f
-\f1\i\fs32 c <- featureCounts(files=file,
-\f4\i0\fs29\fsmilli14667 \
-\pard\pardeftab720\li1920\sl368\partightenfactor0
-
-\f1\i\fs32 \cf2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 annot.ext=gtffile1,
-\f4\i0\fs29\fsmilli14667 \
-
-\f1\i\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 isGTFAnnotationFile=TRUE,
-\f4\i0\fs29\fsmilli14667 \
-
-\f1\i\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 isPairedEnd=TRUE) 
-\f4\i0\fs29\fsmilli14667 \
-}
+###Counting with featureCounts
+library ("Rsubread”)
+fc <- featureCounts(files=file,
+                    annot.ext=gtffile1,
+                    isGTFAnnotationFile=TRUE,
+                    isPairedEnd=TRUE) 
